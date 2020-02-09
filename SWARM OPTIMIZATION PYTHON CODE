@@ -1,0 +1,123 @@
+import numpy as np
+import math
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+from mpl_toolkits.mplot3d import Axes3D
+
+func = lambda x, y: -20 * (math.exp(-0.2 * math.sqrt(0.5 * (x ** 2 + y ** 2)))) - math.exp(
+    0.5 * ((math.cos(2 * 3.14 * x)) + math.cos(2 * 3.14 * y))) + math.exp(1) + 20
+
+blo = -10
+bup = 10
+Vlo = -abs(blo - bup)
+Vup = abs(blo - bup)
+x = (np.random.uniform(blo, bup, (50, 2)))
+x_local = x + np.random.normal(0, 5, 1)
+
+# print(x)
+
+V = (np.random.uniform(Vlo, Vup, (50, 2)))
+# print(V)
+
+xg = 0.6
+yg = 0.6
+
+'''Finding Global position'''
+
+for i in range(0, 5):
+    if (func(x[i][0], x[i][1]) < func(xg, yg)):
+        xg, yg = x[i][0], x[i][1]
+
+itr = 50
+W = 0.05
+Phi_p = 0.5
+Phi_g = 1
+x_global = np.asarray([xg, yg])
+x_scattered = np.zeros((5, 5, 2))
+
+m = 0
+
+'''Gradient Descent'''
+
+import sympy as sy
+from sympy import *
+
+p = symbols('p')
+q = symbols('q')
+# fun=sy.cos(x)
+fun = -20 * (sy.exp(-0.2*sy.sqrt(0.5 * (p ** 2 + q ** 2)))) - sy.exp(
+    0.5 * ((sy.cos(2 * 3.14 * p)) + sy.cos(2 * 3.14 * q))) + sy.exp(1) + 20
+prime_wrt_p = fun.diff(p)
+prime_wrt_q = fun.diff(q)
+
+X = []
+Y = []
+
+
+def descent(a, b, l_r):
+    x_new = a
+    y_new = b
+    for i in range(0, 5):
+        d_x = prime_wrt_p.subs([(p, x_new), (q, y_new)])
+        d_y = prime_wrt_q.subs([(q, y_new), (p, x_new)])
+        step_x = d_x * l_r
+        step_y = d_y * l_r
+        x_new = x_new - step_x
+        y_new = y_new - step_y
+    return x_new, y_new
+
+positions_in_each_itr=np.empty((itr,50,2))  ##3d vector which stores all the postions of each particles(in separate rows) for each iteration
+while (itr>0):
+    for i in range(0, 50):
+        for j in range(0, 2):
+            rp, rg = np.random.uniform(0, 1), np.random.uniform(0, 1)
+            V[i][j] = W * V[i][j] + Phi_p * rp * (x_local[i][j] - x[i][j]) + Phi_g * rg * (x_global[j] - x[i][j])
+
+            # print(V)
+
+    x = x + V ##Updating particle position
+    # print(x)
+    positions_in_each_itr[itr-1]=x ##appending the whole position matrix to a 3d vector
+
+    for k in range(0, 50): ## update with no of particles
+        if (func(x[k][0], x[k][1]) < func(x_local[k][0], x_local[k][1])):
+            x_local[k][0] = x[k][0]
+            x_local[k][1] = x[k][1]
+            if (func(x_local[k][0], x_local[k][1]) < func(x_global[0], x_global[1])):
+                x_global[0] = x_local[k][0]
+                x_global[1] = x_local[k][1]
+                x_global_gradient, y_global_gradient = descent(x_local[k][0], x_local[k][1], 0.5)
+
+    itr = itr - 1
+positions_in_each_itr=positions_in_each_itr[::-1]
+print("positons",positions_in_each_itr)
+
+
+
+
+X = Y = np.linspace(-10, 10, 100)
+Z = np.empty((len(X), len(Y)))
+XX, YY = np.meshgrid(X, Y)
+
+for ele in range(0, len(X)):
+    for ele2 in range(0, len(X)):
+        Z[ele][ele2] = func(X[ele], Y[ele2])
+
+print('global position(using PSO) : ', x_global)
+print('function value at global(using(PSO) : ', func(x_global[0], x_global[1]))
+print('gradient_descent_global_position : ', x_global_gradient, y_global_gradient)
+print('function value at global(using gradient descent)', func(x_global_gradient, y_global_gradient))
+plt.scatter(x_global[0], x_global[1], marker="X")
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.contour(X, Y, Z, levels=10)
+colors = ['r','b','g','c','m']
+# print(colors)
+# for iteration in range(0,50):#till iterations(change the range manually if the iteration is changed)
+#         each_2d_matrix=positions_in_each_itr[iteration]   ## just extracting the 2d matirx from the 3d matrix to make it look simpler
+#         plt.scatter(each_2d_matrix[:,0],each_2d_matrix[:,1])
+#         plt.pause(.5)
+plt.show()
+
+
