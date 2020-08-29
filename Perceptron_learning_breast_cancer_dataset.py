@@ -11,20 +11,20 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
-#%%
 
+#%% Load data/preprocessing
 data=load_breast_cancer()
 df=pd.DataFrame(data=data.data,columns=data.feature_names)
 X=df
 y=data.target
+
+
 #%% Train Test split
 from sklearn.model_selection import train_test_split
-
 X_train,X_test,Y_train,Y_test=train_test_split(X,y, train_size=0.8,stratify=y)
 
 
-#%%
-
+#%% Creating a perceptron class
 class perceptron:
     def __init__(self):
         self.w=None
@@ -68,8 +68,6 @@ class perceptron:
             prediction=self.pred_single(x)
             Y.append(prediction)
         return np.array(Y)
-            
-    
         
         
     def fit(self,X_train,Y_train,epoch=1):
@@ -109,7 +107,7 @@ class perceptron:
             acc1=accuracy_score(self.predict(X_train),Y_train)
             accuracy.append(acc1)
             
-            ##Checks the maximum accuracy achived.Also saves the parameters for max_accuracy
+            ##Checks the maximum accuracy achieved.Also saves the parameters for max_accuracy
             if(acc1>max_acc):
                 max_acc=acc1
                 w_argmax=self.w
@@ -130,16 +128,13 @@ class perceptron:
         # plt.plot(accuracy)
         # plt.show()
             
-#%% Creating an instance
 
+            
+#%% Creating an instance and checking its accuracy on test_dataset
 p=perceptron()
-
 p.fit(X_train.values,Y_train,100)
-
 predictions=p.predict(X_test.values)
-
 accuracy=accuracy_score(Y_test, predictions)
-
 print(accuracy)
             
     
