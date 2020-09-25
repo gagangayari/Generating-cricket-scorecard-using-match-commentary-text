@@ -1,0 +1,4 @@
+Scorecard is being generated using the commentary text file. 
+The commentary in the text file is for the  1st match in the ICC cricket world cup 2019 which was held between England and South Africa. https://www.espncricinfo.com/series/8039/scorecard/1144483/england-vs-south-africa-1st-match-icc-cricket-world-cup-2019
+The commentary file contains the commentary file for both the innings .Both the innings are separated using "##########".
+The score card generated can be compared with the "scorecard" file.
